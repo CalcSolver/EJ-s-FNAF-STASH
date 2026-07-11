@@ -144,7 +144,7 @@
             border: 1px solid #242427;
         }
 
-        iframe {
+        iframe.main-display {
             width: 100%;
             height: 650px;
             border: none;
@@ -170,30 +170,30 @@
         <div class="status-msg" id="status">Loading repository games...</div>
     </div>
 
-    <h2>Movies</h2>
+    <h2>Example</h2>
     <div class="grid-container example-grid">
         <div class="slot" onclick="fetchAndIframe('example1.html')">
             <div class="icon-container">
-                <img class="game-icon" src="Icons/FNAF1.png" alt="FNAF 1" onerror="handleImageError(this)">
+                <img id="example-img-1" class="game-icon" src="" alt="FNAF 1" onerror="handleImageError(this)">
             </div>
             <div class="slot-title">FNAF 1</div>
         </div>
         
         <div class="slot" onclick="fetchAndIframe('example2.html')">
             <div class="icon-container">
-                <img class="game-icon" src="Icons/FNAF2.png" alt="FNAF 2" onerror="handleImageError(this)">
+                <img id="example-img-2" class="game-icon" src="" alt="FNAF 2" onerror="handleImageError(this)">
             </div>
             <div class="slot-title">FNAF 2</div>
         </div>
     </div>
 
     <div class="iframe-container" id="iframeView">
-        <iframe id="exampleFrame" src="" title="Example Content" allowfullscreen></iframe>
+        <iframe id="exampleFrame" class="main-display" src="" title="Example Content" allowfullscreen></iframe>
     </div>
 
     <script>
         // ==========================================
-        //  ⚠️ CHANGE THESE TO MATCH YOUR GITHUB INFO
+        //  ⚙️ CONFIGURATION: MATCH YOUR REPO INFO
         // ==========================================
         const GITHUB_USER = "CalcSolver"; 
         const GITHUB_REPO = "EJ-s-FNAF-STASH";
@@ -202,26 +202,49 @@
         const gamesGrid = document.getElementById('games-grid');
         const statusMsg = document.getElementById('status');
 
+        // Handles broken links or loading failures gracefully
         function handleImageError(image) {
             const container = image.parentElement;
             image.style.display = 'none';
             
-            const fallback = document.createElement('div');
-            fallback.className = 'icon-fallback';
-            fallback.innerText = '🐻';
-            container.appendChild(fallback);
+            // Check if fallback already exists to avoid duplication
+            if (!container.querySelector('.icon-fallback')) {
+                const fallback = document.createElement('div');
+                fallback.className = 'icon-fallback';
+                fallback.innerText = '🐻';
+                container.appendChild(fallback);
+            }
+        }
+
+        // Helper function to read image URL from an icon file
+        async function fetchIconUrl(gameTitle, imgElement) {
+            try {
+                const response = await fetch(`Icons/${gameTitle}.html`);
+                if (!response.ok) throw new Error("Icon file missing");
+                
+                let textUrl = await response.text();
+                textUrl = textUrl.trim();
+                
+                if (textUrl) {
+                    imgElement.src = textUrl;
+                } else {
+                    handleImageError(imgElement);
+                }
+            } catch (err) {
+                handleImageError(imgElement);
+            }
         }
 
         async function loadRepositoryGames() {
             try {
-                // Fetch root files from GitHub API
+                // Fetch repo structure from GitHub
                 const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`;
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Could not fetch repo files.");
+                if (!response.ok) throw new Error("Could not read directory structure");
                 
                 const files = await response.json();
                 
-                // Filter files to only find HTML games (skipping hub files)
+                // Keep only main directory HTML games
                 const gameFiles = files.filter(file => {
                     const name = file.name.toLowerCase();
                     return file.type === "file" && 
@@ -232,43 +255,50 @@
                 });
 
                 if(gameFiles.length === 0) {
-                    statusMsg.innerText = "No game files found in repository.";
+                    statusMsg.innerText = "No game files found in the repository root.";
                     return;
                 }
 
-                // Remove the loading text placeholder
                 statusMsg.remove();
 
-                // Loop through whatever matches and append them onto the board
+                // Setup the Example section static image files on startup
+                fetchIconUrl('FNAF1', document.getElementById('example-img-1'));
+                fetchIconUrl('FNAF2', document.getElementById('example-img-2'));
+
+                // Loop through and map each discovered game file
                 gameFiles.forEach(file => {
-                    const fullFilename = file.name; // e.g., "FNAF4Halloween.html"
-                    const gameTitle = fullFilename.replace('.html', ''); // e.g., "FNAF4Halloween"
+                    const fullFilename = file.name; 
+                    const gameTitle = fullFilename.replace('.html', ''); 
                     
                     const link = document.createElement('a');
                     link.href = fullFilename;
                     link.className = 'slot-link';
 
+                    // Prepare individual slot DOM element
                     link.innerHTML = `
                         <div class="slot">
                             <div class="icon-container">
-                                <img class="game-icon" src="Icons/${gameTitle}.png" alt="${gameTitle}" onerror="handleImageError(this)">
+                                <img id="img-${gameTitle}" class="game-icon" src="" alt="${gameTitle}" onerror="handleImageError(this)">
                             </div>
                             <div class="slot-title">${gameTitle}</div>
                         </div>
                     `;
                     gamesGrid.appendChild(link);
+
+                    // Fetch the text file contents asynchronously to fill in the true image src link
+                    const targetedImg = document.getElementById(`img-${gameTitle}`);
+                    fetchIconUrl(gameTitle, targetedImg);
                 });
 
             } catch (error) {
                 console.error(error);
-                statusMsg.innerText = "Failed to auto-scan repository files. Make sure your GitHub configurations are set correctly inside index.html.";
+                statusMsg.innerText = "Failed to sync with repository workspace.";
             }
         }
 
-        // Run the scanner on page load
         loadRepositoryGames();
 
-        // Iframe content fetching handler
+        // Main live preview iframer
         async function fetchAndIframe(filePath) {
             const container = document.getElementById('iframeView');
             const iframe = document.getElementById('exampleFrame');
@@ -285,7 +315,7 @@
                     container.scrollIntoView({ behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Iframe build failed:", error);
+                console.error("Iframe rendering fault:", error);
             }
         }
     </script>
