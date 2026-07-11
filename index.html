@@ -5,96 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EJ's FNAF STASH</title>
     <style>
+        :root {
+            --bg-color: #0b0b0c;
+            --card-bg: #141416;
+            --accent-red: #ff2a2a;
+            --accent-teal: #00f2fe;
+            --text-main: #ffffff;
+            --text-muted: #8a8a93;
+        }
+
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1 {
-            color: #ff3333;
-            font-size: 3rem;
-            text-shadow: 0 0 10px rgba(255, 51, 51, 0.7);
-            margin-bottom: 30px;
+            color: var(--accent-red);
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 42, 42, 0.4);
+            margin-bottom: 40px;
             text-align: center;
+            text-transform: uppercase;
         }
 
         h2 {
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            border-bottom: 1px solid #242427;
+            padding-bottom: 15px;
             width: 100%;
-            max-width: 1000px;
-            color: #ffaa00;
-            margin-top: 40px;
+            max-width: 1100px;
+            color: #f7b500;
+            margin-top: 50px;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
         }
 
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+            gap: 25px;
             width: 100%;
-            max-width: 1000px;
-        }
-
-        .slot {
-            background-color: #1e1e1e;
-            border: 2px solid #ff3333;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px;
-        }
-
-        .slot:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.6);
-            background-color: #252525;
-        }
-
-        .example-grid .slot {
-            border-color: #00ffcc;
-        }
-
-        .example-grid .slot:hover {
-            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.6);
-        }
-
-        .slot-title {
-            font-size: 1.2rem;
-            font-weight: bold;
+            max-width: 1100px;
+            margin-top: 20px;
         }
 
         .slot-link {
             text-decoration: none;
-            color: white;
+            color: inherit;
+            outline: none;
+        }
+
+        .slot {
+            background-color: var(--card-bg);
+            border: 1px solid #242427;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            height: 100%;
+        }
+
+        /* Hover effects */
+        .slot:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-red);
+            box-shadow: 0 12px 24px rgba(255, 42, 42, 0.25);
+        }
+
+        /* Icon wrapper to maintain square aspect ratio */
+        .icon-container {
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            position: relative;
+            background-color: #0d0d0f;
+        }
+
+        .game-icon {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .slot:hover .game-icon {
+            transform: scale(1.08);
+        }
+
+        /* Fallback icon layout if image fails to load */
+        .icon-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #1f1f23 0%, #101012 100%);
+            color: #3f3f46;
+        }
+
+        .slot-title {
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            background-color: var(--card-bg);
+            border-top: 1px solid #242427;
+            letter-spacing: 0.5px;
+        }
+
+        /* Customizing the Example section cards */
+        .example-grid .slot {
+            cursor: pointer;
+        }
+        .example-grid .slot:hover {
+            border-color: var(--accent-teal);
+            box-shadow: 0 12px 24px rgba(0, 242, 254, 0.25);
         }
 
         .iframe-container {
             width: 100%;
-            max-width: 1000px;
-            margin-top: 25px;
+            max-width: 1100px;
+            margin-top: 35px;
             display: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid #242427;
         }
 
         iframe {
             width: 100%;
-            height: 600px;
-            border: 2px solid #333;
-            border-radius: 8px;
+            height: 650px;
+            border: none;
             background-color: #000;
+            display: block;
         }
     </style>
 </head>
@@ -109,9 +168,16 @@
     <h2>Example</h2>
     <div class="grid-container example-grid">
         <div class="slot" onclick="fetchAndIframe('example1.html')">
+            <div class="icon-container">
+                <img class="game-icon" src="Icons/FNAF1.png" alt="FNAF 1" onerror="handleImageError(this)">
+            </div>
             <div class="slot-title">FNAF 1</div>
         </div>
+        
         <div class="slot" onclick="fetchAndIframe('example2.html')">
+            <div class="icon-container">
+                <img class="game-icon" src="Icons/FNAF2.png" alt="FNAF 2" onerror="handleImageError(this)">
+            </div>
             <div class="slot-title">FNAF 2</div>
         </div>
     </div>
@@ -121,39 +187,51 @@
     </div>
 
     <script>
-        // 1. Generate the 11 Game slots pointing to FNAF1.html ... FNAF11.html
-        const gamesGrid = document.getElementById('games-grid');
+        // Total list of game items (matches filenames in your repo exactly)
         const totalGames = 11;
+        const gamesGrid = document.getElementById('games-grid');
 
+        // Handles missing images gracefully
+        function handleImageError(image) {
+            const container = image.parentElement;
+            image.style.display = 'none';
+            
+            const fallback = document.createElement('div');
+            fallback.className = 'icon-fallback';
+            fallback.innerText = '🐻'; // Clean placeholder emoji
+            container.appendChild(fallback);
+        }
+
+        // Loop to generate slots 1 through 11
         for (let i = 1; i <= totalGames; i++) {
+            const filename = `FNAF${i}`;
+
             const link = document.createElement('a');
-            link.href = `FNAF${i}.html`;
+            link.href = `${filename}.html`;
             link.className = 'slot-link';
 
-            const slot = document.createElement('div');
-            slot.className = 'slot';
-
-            const title = document.createElement('div');
-            title.className = 'slot-title';
-            title.innerText = `FNAF ${i}`;
-
-            slot.appendChild(title);
-            link.appendChild(slot);
+            link.innerHTML = `
+                <div class="slot">
+                    <div class="icon-container">
+                        <img class="game-icon" src="Icons/${filename}.png" alt="${filename}" onerror="handleImageError(this)">
+                    </div>
+                    <div class="slot-title">${filename}</div>
+                </div>
+            `;
             gamesGrid.appendChild(link);
         }
 
-        // 2. Reads the text URL from example1.html or example2.html and puts it in the iframe
+        // Function to resolve external file and render iframe
         async function fetchAndIframe(filePath) {
             const container = document.getElementById('iframeView');
             const iframe = document.getElementById('exampleFrame');
             
             try {
-                // Fetch the URL text inside your file
                 const response = await fetch(filePath);
                 if (!response.ok) throw new Error('File not found');
                 
                 let url = await response.text();
-                url = url.trim(); // Clean up any spaces or line breaks
+                url = url.trim();
 
                 if (url) {
                     iframe.src = url;
@@ -161,8 +239,8 @@
                     container.scrollIntoView({ behavior: 'smooth' });
                 }
             } catch (error) {
-                console.error("Could not load the URL from file:", error);
-                alert("Failed to load the website URL from " + filePath);
+                console.error("Iframe build failed:", error);
+                alert("Could not load url tracking configuration from " + filePath);
             }
         }
     </script>
