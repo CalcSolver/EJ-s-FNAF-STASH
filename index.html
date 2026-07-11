@@ -74,17 +74,15 @@
             height: 100%;
         }
 
-        /* Hover effects */
         .slot:hover {
             transform: translateY(-8px);
             border-color: var(--accent-red);
             box-shadow: 0 12px 24px rgba(255, 42, 42, 0.25);
         }
 
-        /* Icon wrapper to maintain square aspect ratio */
         .icon-container {
             width: 100%;
-            padding-top: 100%; /* 1:1 Aspect Ratio */
+            padding-top: 100%; 
             position: relative;
             background-color: #0d0d0f;
         }
@@ -103,7 +101,6 @@
             transform: scale(1.08);
         }
 
-        /* Fallback icon layout if image fails to load */
         .icon-fallback {
             position: absolute;
             top: 0;
@@ -128,7 +125,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Customizing the Example section cards */
         .example-grid .slot {
             cursor: pointer;
         }
@@ -155,6 +151,14 @@
             background-color: #000;
             display: block;
         }
+
+        .status-msg {
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +167,8 @@
 
     <h2>Games</h2>
     <div class="grid-container" id="games-grid">
-        </div>
+        <div class="status-msg" id="status">Loading repository games...</div>
+    </div>
 
     <h2>Example</h2>
     <div class="grid-container example-grid">
@@ -187,41 +192,83 @@
     </div>
 
     <script>
-        // Total list of game items (matches filenames in your repo exactly)
-        const totalGames = 11;
-        const gamesGrid = document.getElementById('games-grid');
+        // ==========================================
+        //  ⚠️ CHANGE THESE TO MATCH YOUR GITHUB INFO
+        // ==========================================
+        const GITHUB_USER = "CalcSolver"; 
+        const GITHUB_REPO = "EJ-s-FNAF-STASH";
+        // ==========================================
 
-        // Handles missing images gracefully
+        const gamesGrid = document.getElementById('games-grid');
+        const statusMsg = document.getElementById('status');
+
         function handleImageError(image) {
             const container = image.parentElement;
             image.style.display = 'none';
             
             const fallback = document.createElement('div');
             fallback.className = 'icon-fallback';
-            fallback.innerText = '🐻'; // Clean placeholder emoji
+            fallback.innerText = '🐻';
             container.appendChild(fallback);
         }
 
-        // Loop to generate slots 1 through 11
-        for (let i = 1; i <= totalGames; i++) {
-            const filename = `FNAF${i}`;
+        async function loadRepositoryGames() {
+            try {
+                // Fetch root files from GitHub API
+                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Could not fetch repo files.");
+                
+                const files = await response.json();
+                
+                // Filter files to only find HTML games (skipping hub files)
+                const gameFiles = files.filter(file => {
+                    const name = file.name.toLowerCase();
+                    return file.type === "file" && 
+                           file.name.endsWith(".html") && 
+                           name !== "index.html" && 
+                           name !== "example1.html" && 
+                           name !== "example2.html";
+                });
 
-            const link = document.createElement('a');
-            link.href = `${filename}.html`;
-            link.className = 'slot-link';
+                if(gameFiles.length === 0) {
+                    statusMsg.innerText = "No game files found in repository.";
+                    return;
+                }
 
-            link.innerHTML = `
-                <div class="slot">
-                    <div class="icon-container">
-                        <img class="game-icon" src="Icons/${filename}.png" alt="${filename}" onerror="handleImageError(this)">
-                    </div>
-                    <div class="slot-title">${filename}</div>
-                </div>
-            `;
-            gamesGrid.appendChild(link);
+                // Remove the loading text placeholder
+                statusMsg.remove();
+
+                // Loop through whatever matches and append them onto the board
+                gameFiles.forEach(file => {
+                    const fullFilename = file.name; // e.g., "FNAF4Halloween.html"
+                    const gameTitle = fullFilename.replace('.html', ''); // e.g., "FNAF4Halloween"
+                    
+                    const link = document.createElement('a');
+                    link.href = fullFilename;
+                    link.className = 'slot-link';
+
+                    link.innerHTML = `
+                        <div class="slot">
+                            <div class="icon-container">
+                                <img class="game-icon" src="Icons/${gameTitle}.png" alt="${gameTitle}" onerror="handleImageError(this)">
+                            </div>
+                            <div class="slot-title">${gameTitle}</div>
+                        </div>
+                    `;
+                    gamesGrid.appendChild(link);
+                });
+
+            } catch (error) {
+                console.error(error);
+                statusMsg.innerText = "Failed to auto-scan repository files. Make sure your GitHub configurations are set correctly inside index.html.";
+            }
         }
 
-        // Function to resolve external file and render iframe
+        // Run the scanner on page load
+        loadRepositoryGames();
+
+        // Iframe content fetching handler
         async function fetchAndIframe(filePath) {
             const container = document.getElementById('iframeView');
             const iframe = document.getElementById('exampleFrame');
@@ -229,7 +276,6 @@
             try {
                 const response = await fetch(filePath);
                 if (!response.ok) throw new Error('File not found');
-                
                 let url = await response.text();
                 url = url.trim();
 
@@ -240,7 +286,6 @@
                 }
             } catch (error) {
                 console.error("Iframe build failed:", error);
-                alert("Could not load url tracking configuration from " + filePath);
             }
         }
     </script>
