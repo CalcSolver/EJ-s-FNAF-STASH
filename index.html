@@ -108,52 +108,62 @@
 
     <h2>Example</h2>
     <div class="grid-container example-grid">
-        <div class="slot" onclick="loadExample('example1.html')">
-            <div class="slot-title">Example Website 1</div>
+        <div class="slot" onclick="fetchAndIframe('example1.html')">
+            <div class="slot-title">FNAF 1</div>
         </div>
-        <div class="slot" onclick="loadExample('example2.html')">
-            <div class="slot-title">Example Website 2</div>
+        <div class="slot" onclick="fetchAndIframe('example2.html')">
+            <div class="slot-title">FNAF 2</div>
         </div>
     </div>
 
     <div class="iframe-container" id="iframeView">
-        <iframe id="exampleFrame" src="" title="Example Content"></iframe>
+        <iframe id="exampleFrame" src="" title="Example Content" allowfullscreen></iframe>
     </div>
 
     <script>
-        // 1. Automatically generate the 11 FNAF slots
+        // 1. Generate the 11 Game slots pointing to FNAF1.html ... FNAF11.html
         const gamesGrid = document.getElementById('games-grid');
         const totalGames = 11;
 
         for (let i = 1; i <= totalGames; i++) {
-            // Create the anchor link pointing to FNAF1.html, FNAF2.html, etc.
             const link = document.createElement('a');
             link.href = `FNAF${i}.html`;
             link.className = 'slot-link';
 
-            // Create the visual slot box
             const slot = document.createElement('div');
             slot.className = 'slot';
 
-            // Create the title text
             const title = document.createElement('div');
             title.className = 'slot-title';
             title.innerText = `FNAF ${i}`;
 
-            // Assemble and append to the grid
             slot.appendChild(title);
             link.appendChild(slot);
             gamesGrid.appendChild(link);
         }
 
-        // 2. Handle loading the example website iframes
-        function loadExample(url) {
+        // 2. Reads the text URL from example1.html or example2.html and puts it in the iframe
+        async function fetchAndIframe(filePath) {
             const container = document.getElementById('iframeView');
             const iframe = document.getElementById('exampleFrame');
             
-            iframe.src = url;
-            container.style.display = 'block';
-            container.scrollIntoView({ behavior: 'smooth' });
+            try {
+                // Fetch the URL text inside your file
+                const response = await fetch(filePath);
+                if (!response.ok) throw new Error('File not found');
+                
+                let url = await response.text();
+                url = url.trim(); // Clean up any spaces or line breaks
+
+                if (url) {
+                    iframe.src = url;
+                    container.style.display = 'block';
+                    container.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error("Could not load the URL from file:", error);
+                alert("Failed to load the website URL from " + filePath);
+            }
         }
     </script>
 
