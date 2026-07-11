@@ -43,7 +43,7 @@
 
         .slot {
             background-color: #1e1e1e;
-            border: 2px solid #333;
+            border: 2px solid #ff3333;
             border-radius: 8px;
             padding: 20px;
             text-align: center;
@@ -58,17 +58,20 @@
 
         .slot:hover {
             transform: translateY(-5px);
-            border-color: #ff3333;
-            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.6);
+            background-color: #252525;
+        }
+
+        .example-grid .slot {
+            border-color: #00ffcc;
         }
 
         .example-grid .slot:hover {
-            border-color: #00ffcc;
-            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.6);
         }
 
         .slot-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
         }
 
@@ -83,12 +86,12 @@
             width: 100%;
             max-width: 1000px;
             margin-top: 25px;
-            display: none; /* Hidden by default until an example slot is clicked */
+            display: none;
         }
 
         iframe {
             width: 100%;
-            height: 500px;
+            height: 600px;
             border: 2px solid #333;
             border-radius: 8px;
             background-color: #000;
@@ -100,24 +103,12 @@
     <h1>EJ's FNAF STASH</h1>
 
     <h2>Games</h2>
-    <div class="grid-container">
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 1</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 2</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 3</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 4</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 5</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 6</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 7</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 8</div></div></a>
-        <a href="thegame.html" class="slot-link"><div class="slot"><div class="slot-title">Game Slot 9</div></div></a>
-        
-        <a href="game2.html" class="slot-link"><div class="slot" style="border-color: #00aaff;"><div class="slot-title">Separate Game 1</div></div></a>
-        <a href="game3.html" class="slot-link"><div class="slot" style="border-color: #00aaff;"><div class="slot-title">Separate Game 2</div></div></a>
-    </div>
+    <div class="grid-container" id="games-grid">
+        </div>
 
     <h2>Example</h2>
     <div class="grid-container example-grid">
-        <div class="slot" onclick="loadExample('example.html')">
+        <div class="slot" onclick="loadExample('example1.html')">
             <div class="slot-title">Example Website 1</div>
         </div>
         <div class="slot" onclick="loadExample('example2.html')">
@@ -130,14 +121,38 @@
     </div>
 
     <script>
+        // 1. Automatically generate the 11 FNAF slots
+        const gamesGrid = document.getElementById('games-grid');
+        const totalGames = 11;
+
+        for (let i = 1; i <= totalGames; i++) {
+            // Create the anchor link pointing to FNAF1.html, FNAF2.html, etc.
+            const link = document.createElement('a');
+            link.href = `FNAF${i}.html`;
+            link.className = 'slot-link';
+
+            // Create the visual slot box
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+
+            // Create the title text
+            const title = document.createElement('div');
+            title.className = 'slot-title';
+            title.innerText = `FNAF ${i}`;
+
+            // Assemble and append to the grid
+            slot.appendChild(title);
+            link.appendChild(slot);
+            gamesGrid.appendChild(link);
+        }
+
+        // 2. Handle loading the example website iframes
         function loadExample(url) {
             const container = document.getElementById('iframeView');
             const iframe = document.getElementById('exampleFrame');
             
             iframe.src = url;
-            container.style.display = 'block'; // Show the iframe container when a slot is clicked
-            
-            // Scroll down smoothly to the iframe view
+            container.style.display = 'block';
             container.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
